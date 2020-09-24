@@ -17,7 +17,6 @@ buildscript {
       url 'https://jitpack.io'
     }
   }
-
   dependencies {
     classpath buildPlugins.shadow
     classpath buildPlugins.sonarqube
@@ -25,10 +24,20 @@ buildscript {
     classpath buildPlugins.gretty
     classpath buildPlugins.grgit
     classpath buildPlugins.protobuf
-    implementation 'com.github.scopeForImagination:netcdf-java:Tag'
+
+    //compile 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC2'
   }
 }
+apply plugin: 'java'
+//apply plugin: 'maven'
 
+dependencies {
+    //implementation 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC2'
+    compile 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC2'
+}
+task install {
+	dependsOn assemble
+}
 allprojects {
   // Matches Maven's "project.groupId". Used in MANIFEST.MF for "Implementation-Vendor-Id".
   group = 'edu.ucar'
