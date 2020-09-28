@@ -24,20 +24,9 @@ buildscript {
     classpath buildPlugins.gretty
     classpath buildPlugins.grgit
     classpath buildPlugins.protobuf
-
-    //compile 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC2'
   }
 }
-apply plugin: 'java'
-//apply plugin: 'maven'
 
-dependencies {
-    //implementation 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC2'
-    compile 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC2'
-}
-task install {
-	dependsOn assemble
-}
 allprojects {
   // Matches Maven's "project.groupId". Used in MANIFEST.MF for "Implementation-Vendor-Id".
   group = 'edu.ucar'
@@ -51,6 +40,77 @@ allprojects {
   status = 'development'
 }
 
+subprojects{
+	//apply plugin: 'java-platform'
+	apply plugin: 'maven'
+
+
+	//dependencies {
+    		//implementation 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC4'
+    	//	compile 'com.github.scopeForImagination:netcdf-java:v6.0.0-RC2'
+	//}
+	//afterEvaluate { archives.dependsOn assemble }
+	//task install {
+	//	dependsOn assemble
+	//}
+	/*task sourcesJar(type: Jar, dependsOn: assemble) {
+	    classifier = 'sources'
+	    from sourceSets.main.allSource
+	}*/
+	
+	/*task javadocJar(type: Jar, dependsOn: javadoc) {
+	    classifier = 'javadoc'
+	    from javadoc.destinationDir
+	}*/
+	
+	//artifacts {
+	//    archives sourcesJar
+	    //archives javadocJar
+	//}
+}
+def buildFolder = "/build/libs/"
+def myjars = [["bufr","bufr"],["cdm/core","cdm-core"],["cdm/s3","cdm-s3"],["cdm-lite","cdm-lite"],["cdm-test","cdm-test"],["cdm-test-utils","cdm-test-utils"],["cdmr","cdmr"],["grib","grib"],["httpservices","httpservices"],["netcdf4","netcdf4"],["opendap","opendap"],["udunits","utunits"],["uibase","uibase"],["uicdm","uicdm"],["waterml","waterml"]]
+artifacts {
+	myjars.each{ element ->
+		def artifactName = element[1]
+		def folder = element[0]
+		//archives new DefaultPublishArtifact(artifactName,"jar","jar",null, new Date(), new File("${folder}${buildFolder}${artifactName}${version}.jar"))
+		archives name: artifactName, type: "jar", file: new File("${folder}${buildFolder}${artifactName}${version}.jar")
+		}
+  //archives file: 'A.jar', name: 'A', type: 'jar'
+  //archives file: 'A-sources.jar', name: 'A', type: 'jar', classifier: 'sources'
+  //archives file: 'B.jar', name: 'B', type: 'jar'
+  //archives file: 'B-sources.jar', name: 'B', type: 'jar', classifier: 'sources'
+}
+import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			configuration = configurations.deployerJars
+			repository(url: "dav:https://myRepo.com/release/") {
+				authentication(userName: xxx, password: yyy)
+			}
+			myjars.each{ element ->
+				def artifactName = element[1]
+				def folder = element[0]
+				addFilter(artifactName) {artifact, file ->
+					artifact.name == artifactName
+				}
+				pom(artifactName).artifactId = artifactName
+				pom(artifactName).version = version
+			}
+			/*addFilter('A') {artifact, file ->
+				artifact.name == 'A'
+			}
+			addFilter('B') {artifact, file ->
+				artifact.name == 'B'
+			}
+			
+			pom('A').version = ant.properties['release.version']
+			pom('B').version = ant.properties['release.version']*/
+		}
+	}
+}
 // Matches Maven's "project.description".
 description = 'The Unidata netCDF-Java library (aka CDM).'
 
